@@ -176,9 +176,6 @@ public class UIUpdater : MonoBehaviour
         else if (angle < 292.5) windDirectionString = "W";
         else windDirectionString = "NW";
         Inventory? mInventory = controlledShip.GetComponentInChildren<Container>()?.m_inventory;
-        //string text = $"Ship Speed:\n\t{speedKnots:0.#} knots\n\t{speedMph:0.#} mph\n" + $"Wind Speed: {windSpeed:0.#} knots\n" + $"Wind Direction: {angle:0.#}° {windDirectionString}\n" + (mInventory == null
-        //                  ? ""
-        //                  : $"Ship Inventory: {mInventory?.m_inventory.Count}/{mInventory?.m_width * mInventory?.m_height} ({mInventory?.SlotsUsedPercentage():0.#}%)\n");
         string text = string.Format(
             ShipStatsPlugin.TextFormat.Value,
             speedKnots, speedMph, windSpeed, angle, windDirectionString, (mInventory == null ? "" : string.Format("Ship Inventory: {0}/{1} ({2:0.#}%)\n", mInventory?.m_inventory.Count, mInventory?.m_width * mInventory?.m_height, mInventory?.SlotsUsedPercentage())));
