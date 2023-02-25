@@ -1,9 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +15,7 @@ namespace ShipStats
     public class ShipStatsPlugin : BaseUnityPlugin
     {
         internal const string ModName = "ShipStats";
-        internal const string ModVersion = "1.0.0";
+        internal const string ModVersion = "1.0.1";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
         private static string ConfigFileName = ModGUID + ".cfg";
@@ -37,8 +39,8 @@ namespace ShipStats
                 "Font Size of the stats text. Default is 15.");
             TextColor = config("1 - Text", "Stats Text Color", new Color(1,1,1,1),
                 "Color of the stats text. Default is white.");
-            TextFormat = config("1 - Text", "Stats Text Format", "Ship Speed:\n\t{0:0.#} knots\n\t{1:0.#} mph\nWind Speed: {2:0.#} knots\nWind Direction: {3:0.#}° {4}\n{5}",
-                "{0} is ship speed in knots\n{1} is ship speed in mph\n{2} is wind speed in knots\n{3} is wind direction in degrees\n{4} is wind direction in cardinal directions\n{5} is ship inventory count and percent");
+            TextFormat = TextEntryConfig("1 - Text", "Stats Text Format", "Ship Speed:\n\t{0:0.#} knots\n\t{1:0.#} mph\nWind Speed: {2:0.#} knots\nWind Direction: {3:0.#}° {4}\n{5}\n{6}",
+                "{0} is ship speed in knots\n{1} is ship speed in mph\n{2} is wind speed in knots\n{3} is wind direction in degrees\n{4} is wind direction in cardinal directions\n{5} is ship inventory count and percent\n{6} is the ship health");
             
             AnchoredPosition = config("2 - UI", "Stats Anchored Position", new Vector2(200,-27),
                 "Anchored position of the stats text. Please note that this is relative to the rudder icon. Default is 200,-27.");
@@ -129,10 +131,30 @@ namespace ShipStats
         {
             return config(group, name, value, new ConfigDescription(description));
         }
+        
+        ConfigEntry<T> TextEntryConfig<T>(string group, string name, T value, string desc)
+        {
+            ConfigurationManagerAttributes attributes = new()
+            {
+                CustomDrawer = TextAreaDrawer
+            };
+            return config(group, name, value, new ConfigDescription(desc, null, attributes));
+        }
+        
+        internal static void TextAreaDrawer(ConfigEntryBase entry)
+        {
+            GUILayout.ExpandHeight(true);
+            GUILayout.ExpandWidth(true);
+            entry.BoxedValue = GUILayout.TextArea((string)entry.BoxedValue, GUILayout.ExpandWidth(true),
+                GUILayout.ExpandHeight(true));
+        }
 
         private class ConfigurationManagerAttributes
         {
-            public bool? Browsable = false;
+            [UsedImplicitly] public int? Order;
+            [UsedImplicitly] public bool? Browsable;
+            [UsedImplicitly] public string? Category;
+            [UsedImplicitly] public Action<ConfigEntryBase>? CustomDrawer;
         }
 
         class AcceptableShortcuts : AcceptableValueBase

@@ -162,6 +162,18 @@ public class UIUpdater : MonoBehaviour
         float shipSpeed = Mathf.Abs(controlledShip.GetSpeed());
         float speedMph = Mathf.Abs(shipSpeed * mphMultiplier); // convert m/s to mph
         float speedKnots = Mathf.Abs(shipSpeed * knotsMultiplier); // convert m/s to knots
+        float shipHealth = 0.0f;
+        float shipDefaultHealth = 0.0f;
+        controlledShip.TryGetComponent(out WearNTear wearNTear);
+        if (wearNTear)
+        {
+            if (controlledShip.m_nview.IsValid() && !(controlledShip.m_nview.GetZDO().GetFloat("health", wearNTear.m_health) <= 0.0))
+            {
+                shipDefaultHealth = wearNTear.m_health;
+                shipHealth = controlledShip.m_nview.GetZDO().GetFloat("health", wearNTear.m_health);
+            }
+        }
+
         // Get Wind Direction
         string windDirectionString;
         Vector3 windDir = EnvMan.instance.GetWindDir();
@@ -176,9 +188,21 @@ public class UIUpdater : MonoBehaviour
         else if (angle < 292.5) windDirectionString = "W";
         else windDirectionString = "NW";
         Inventory? mInventory = controlledShip.GetComponentInChildren<Container>()?.m_inventory;
-        string text = string.Format(
-            ShipStatsPlugin.TextFormat.Value,
-            speedKnots, speedMph, windSpeed, angle, windDirectionString, (mInventory == null ? "" : string.Format("Ship Inventory: {0}/{1} ({2:0.#}%)\n", mInventory?.m_inventory.Count, mInventory?.m_width * mInventory?.m_height, mInventory?.SlotsUsedPercentage())));
+        string text;
+        try
+        {
+            text = string.Format(ShipStatsPlugin.TextFormat.Value, speedKnots, speedMph, windSpeed, angle,
+                windDirectionString,
+                (mInventory == null
+                    ? ""
+                    : string.Format("Ship Inventory: {0}/{1} ({2:0.#}%)", mInventory?.m_inventory.Count,
+                        mInventory?.m_width * mInventory?.m_height, mInventory?.SlotsUsedPercentage())),
+                shipHealth > 0 ? string.Format("Ship Health: {0:0}/{1:0}", shipHealth, shipDefaultHealth) : "");
+        }
+        catch
+        {
+            text = "Error in Text Format";
+        }
 
         HudAwakePatch.contentText.text = text;
         HudAwakePatch.contentText2.text = text;

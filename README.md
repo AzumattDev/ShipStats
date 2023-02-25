@@ -40,6 +40,7 @@ For Questions or Comments, find me in the Odin Plus Team Discord or in mine:
 
 > # Changelog
 
-| `Version` | `Update Notes`  |      
-|-----------|-----------------|
-| 1.0.0     | Initial Release |
+| `Version` | `Update Notes`                                       |      
+|-----------|------------------------------------------------------|
+| 1.0.1     | Add ship health, per request of Dabz#8309 on Discord |
+| 1.0.0     | Initial Release                                      |

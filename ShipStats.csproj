@@ -107,6 +107,7 @@
         <Content Include="Thunderstore\icon.png" />
         <Content Include="Thunderstore\manifest.json" />
         <Content Include="Thunderstore\README.md" />
+        <Content Include="UpdateManifest.ps1" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -130,6 +131,8 @@
             <Minor>$(AssemblyVersion.Split('.')[1])</Minor>
             <Patch>$(AssemblyVersion.Split('.')[2])</Patch>
             <PackageName>$(AssemblyName)_v$(Major).$(Minor).$(Patch)</PackageName>
+            <PackageVersion>$(Major).$(Minor).$(Patch)</PackageVersion>
+            <VersionString>$(Major).$(Minor).$(Patch)</VersionString>
             <PackageDir>Thunderstore\$(PackageName)</PackageDir>
         </PropertyGroup>
     </Target>
@@ -139,7 +142,17 @@
     <Target Name="CopyREADME" AfterTargets="CopyOutputDLL">
         <Copy SourceFiles="README.md" DestinationFolder="Thunderstore" OverwriteReadOnlyFiles="true" />
     </Target>
-    <Target Name="MakeThunderstorePackage" AfterTargets="CopyREADME">
+    <Target Name="UpdateManifestVersion" AfterTargets="CopyREADME">
+        <ItemGroup>
+            <ManifestFile Include="$(ProjectDir)Thunderstore\manifest.json" />
+        </ItemGroup>
+
+        <Message Text="ManifestFile is @(ManifestFile)" />
+        <Error Text="Thunderstore\manifest.json not found" Condition="!Exists(@(ManifestFile))" />
+        <Message Text="Updating version number in Thunderstore\manifest.json" Condition="Exists(@(ManifestFile))" />
+        <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;&amp; { &amp; '$(ProjectDir)UpdateManifest.ps1' -manifestFile '@(ManifestFile)' -versionString '$(PackageVersion)' }&quot;" />
+    </Target>
+    <Target Name="MakeThunderstorePackage" AfterTargets="UpdateManifestVersion" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
         <ItemGroup>
             <PackageFiles Include="$(TargetDir)$(AssemblyName).dll; Thunderstore\README.md; Thunderstore\manifest.json; Thunderstore\icon.png;" />
         </ItemGroup>
