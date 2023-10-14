@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using HarmonyLib;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -13,8 +14,8 @@ static class HudAwakePatch
     // Create GameObject
     public static GameObject Go = null!;
     public static GameObject Go2 = null!;
-    public static Text contentText = null!;
-    public static Text contentText2 = null!;
+    public static TextMeshProUGUI contentText = null!;
+    public static TextMeshProUGUI contentText2 = null!;
 
     static void Postfix(Hud __instance)
     {
@@ -48,33 +49,39 @@ static class HudAwakePatch
         textObj.transform.SetParent(layout.transform);
         if (gameObject.name.EndsWith("PlayerControlled", StringComparison.Ordinal))
         {
-            contentText = textObj.AddComponent<Text>();
+            contentText = textObj.AddComponent<TextMeshProUGUI>();
             contentText.color = ShipStatsPlugin.TextColor.Value;
             contentText.font = MessageHud.instance.m_messageCenterText.font;
-            contentText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            contentText.overflowMode = TextOverflowModes.Overflow;
             contentText.fontSize = ShipStatsPlugin.FontSize.Value;
             contentText.enabled = true;
-            contentText.alignment = TextAnchor.MiddleCenter;
+            contentText.alignment = TextAlignmentOptions.Center;
         }
         else
         {
-            contentText2 = textObj.AddComponent<Text>();
+            contentText2 = textObj.AddComponent<TextMeshProUGUI>();
             contentText2.color = ShipStatsPlugin.TextColor.Value;
             contentText2.font = MessageHud.instance.m_messageCenterText.font;
-            contentText2.horizontalOverflow = HorizontalWrapMode.Overflow;
+            contentText2.overflowMode = TextOverflowModes.Overflow;
             contentText2.fontSize = ShipStatsPlugin.FontSize.Value;
             contentText2.enabled = true;
-            contentText2.alignment = TextAnchor.MiddleCenter;
+            contentText2.alignment = TextAlignmentOptions.Center;
         }
-
-        Outline textOutline = textObj.AddComponent<Outline>();
-        textOutline.effectColor = Color.black;
-        textOutline.effectDistance = new Vector2(1, -1);
-        textOutline.useGraphicAlpha = true;
         gameObject.AddComponent<UIUpdater>();
         // Move go -27 lower and 200 to the right
         rect.anchoredPosition = ShipStatsPlugin.AnchoredPosition.Value;
         gameObject.SetActive(false);
+    }
+}
+
+[HarmonyPatch(typeof(Localization), nameof(Localization.Localize), typeof(string))]
+public class LocalizePatch
+{
+    public static bool Prefix(ref string text)
+    {
+        if (text != null) return true;
+        text = string.Empty;
+        return false;
     }
 }
 
