@@ -129,7 +129,7 @@ public class UIUpdater : MonoBehaviour
 {
     internal Vector3 size;
     internal Vector2 offset;
-    internal Transform rectransform;
+    internal Transform rectransform = null!;
     const float knotsMultiplier = 1.94384f;
     const float mphMultiplier = 2.237f;
 
