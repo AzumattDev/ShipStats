@@ -19,7 +19,8 @@ static class HudAwakePatch
 
     static void Postfix(Hud __instance)
     {
-        // Create new UI object and add it to the HUD
+        ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("Hud.Awake Postfix started");
+
         Go = new GameObject("AzuShipStatsPlayerControlled");
         Go.transform.SetParent(Utils.FindChild(__instance.m_shipHudRoot.transform, "Controls"), false);
 
@@ -28,18 +29,19 @@ static class HudAwakePatch
         Go2.name = "AzuShipStatsPlayerOnBoard";
         AddTheComponents(Go);
         AddTheComponents(Go2);
+
+        ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("UI elements created and components added");
     }
 
     public static void AddTheComponents(GameObject gameObject)
     {
-        // Add RectTransform component
-        RectTransform? rect = gameObject.AddComponent<RectTransform>();
-        // Add image component and allow color change
-        Image? image = gameObject.AddComponent<Image>();
+        ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug($"Adding components to {gameObject.name}");
+
+        RectTransform rect = gameObject.AddComponent<RectTransform>();
+        Image image = gameObject.AddComponent<Image>();
         image.color = ShipStatsPlugin.PanelColor.Value;
 
-        // Add vertical layout group component
-        VerticalLayoutGroup? layout = gameObject.AddComponent<VerticalLayoutGroup>();
+        VerticalLayoutGroup layout = gameObject.AddComponent<VerticalLayoutGroup>();
         layout.padding = new RectOffset(5, 5, 5, 5);
         ContentSizeFitter contentFitter = gameObject.AddComponent<ContentSizeFitter>();
         contentFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -47,6 +49,7 @@ static class HudAwakePatch
 
         GameObject textObj = new($"{gameObject.name}Content");
         textObj.transform.SetParent(layout.transform);
+
         if (gameObject.name.EndsWith("PlayerControlled", StringComparison.Ordinal))
         {
             contentText = textObj.AddComponent<TextMeshProUGUI>();
@@ -67,21 +70,12 @@ static class HudAwakePatch
             contentText2.enabled = true;
             contentText2.alignment = TextAlignmentOptions.Center;
         }
+
         gameObject.AddComponent<UIUpdater>();
-        // Move go -27 lower and 200 to the right
         rect.anchoredPosition = ShipStatsPlugin.AnchoredPosition.Value;
         gameObject.SetActive(false);
-    }
-}
 
-[HarmonyPatch(typeof(Localization), nameof(Localization.Localize), typeof(string))]
-public class LocalizePatch
-{
-    public static bool Prefix(ref string text)
-    {
-        if (text != null) return true;
-        text = string.Empty;
-        return false;
+        ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug($"Components added to {gameObject.name}");
     }
 }
 
@@ -90,13 +84,27 @@ static class ShipOnTriggerEnterPatch
 {
     static void Postfix(Ship __instance, Collider collider)
     {
+        ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("Ship.OnTriggerEnter started");
+
         Player component = collider.GetComponent<Player>();
         if (!component)
+        {
+            ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("No player component found");
             return;
+        }
+
         if (!(component == Player.m_localPlayer))
+        {
+            ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("Player is not local player");
             return;
+        }
+
         HudAwakePatch.Go.SetActive(true);
+        ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("AzuShipStatsPlayerControlled UI set active");
+
+        // Uncomment to debug Go2 activation
         //HudAwakePatch.Go2.SetActive(true);
+        //ShipStatsPlugin.ShipStatsLogger.LogWarning("AzuShipStatsPlayerOnBoard UI set active");
     }
 }
 
@@ -107,13 +115,24 @@ static class ShipOnTriggerExitDestroyedPatch
     [HarmonyPatch(nameof(Ship.OnTriggerExit))]
     static void Postfix1(Ship __instance, Collider collider)
     {
+        ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("Ship.OnTriggerExit started");
+
         Player component = collider.GetComponent<Player>();
         if (!component)
+        {
+            ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("No player component found");
             return;
+        }
+
         if (!(component == Player.m_localPlayer))
+        {
+            ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("Player is not local player");
             return;
+        }
+
         HudAwakePatch.Go.SetActive(false);
         HudAwakePatch.Go2.SetActive(false);
+        ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("UI elements set inactive");
     }
 
     [HarmonyPostfix]
@@ -122,6 +141,7 @@ static class ShipOnTriggerExitDestroyedPatch
     {
         HudAwakePatch.Go.SetActive(false);
         HudAwakePatch.Go2.SetActive(false);
+        ShipStatsPlugin.ShipStatsLogger.LogDebugIfBuildDebug("UI elements set inactive on ship destruction");
     }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "Ship_Stats",
-  "version_number": "1.0.3",
+  "version_number": "1.0.4",
   "website_url": "https://discord.gg/pdHgy6Bsng",
   "description": "A simple mod that I made at request. Shows the stats of the ship that you are currently on.",
   "dependencies": [

@@ -141,7 +141,7 @@
         </PropertyGroup>
     </Target>
     <Target Name="CopyOutputDLL" AfterTargets="GetAssemblyVersion">
-        <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="C:\Users\crypt\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\PTB 0.217.22\BepInEx\plugins" OverwriteReadOnlyFiles="true" />
+        <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="C:\Users\crypt\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\TilValhallaTEST\BepInEx\plugins\Azumatt-Ship_Stats" OverwriteReadOnlyFiles="true" />
     </Target>
     <Target Name="CopyREADME" AfterTargets="CopyOutputDLL">
         <Copy SourceFiles="README.md" DestinationFolder="Thunderstore" OverwriteReadOnlyFiles="true" />
